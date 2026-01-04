@@ -1,5 +1,5 @@
 pipeline {
-  agent any
+  agent { label 'terraform' }
   environment {
     AWS_DEFAULT_REGION = 'eu-west-1'
     TF_VAR_instance_type = 't2.micro'
