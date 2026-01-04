@@ -1,5 +1,5 @@
 pipeline {
-  agent { label 'terraform' }
+  agent { label 'terraform' }   // Use your agent's label here
   environment {
     AWS_DEFAULT_REGION = 'eu-west-1'
     TF_VAR_instance_type = 't2.micro'
@@ -26,8 +26,13 @@ pipeline {
         branch 'prod'
       }
       steps {
-        input message: "Do you want to apply changes to production?"
-        sh 'terraform apply tfplan'
+        withCredentials([
+          string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+          string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
+        ]) {
+          input message: "Do you want to apply changes to production?"
+          sh 'terraform apply tfplan'
+        }
       }
     }
     stage('Apply to Stage') {
@@ -35,13 +40,23 @@ pipeline {
         branch 'stage'
       }
       steps {
-        sh 'terraform apply -auto-approve'
+        withCredentials([
+          string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+          string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
+        ]) {
+          sh 'terraform apply -auto-approve'
+        }
       }
     }
   }
   post {
     always {
-      sh 'terraform output'
+      withCredentials([
+        string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+        string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
+      ]) {
+        sh 'terraform output'
+      }
     }
   }
 }
