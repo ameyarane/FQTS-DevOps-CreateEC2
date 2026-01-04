@@ -9,7 +9,7 @@ variable "environment" {
 
 # Create a security group in the correct VPC
 resource "aws_security_group" "jenkins_sg" {
-  name        = "jenkins-sg-temp"
+  name        = "jenkins-sg-temp-${var.environment}"
   description = "Security group for Jenkins EC2"
   vpc_id      =  "vpc-020cdb293828a27e7"
 
