@@ -17,7 +17,8 @@ pipeline {
           string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
         ]) {
           sh 'terraform init'
-          sh 'terraform plan -out=tfplan'
+          //sh 'terraform plan -out=tfplan'
+          sh "terraform plan -var='environment=${env.BRANCH_NAME}' -out=tfplan"
         }
       }
     }
@@ -31,7 +32,8 @@ pipeline {
           string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
         ]) {
           input message: "Do you want to apply changes to production?"
-          sh 'terraform apply tfplan'
+          //sh 'terraform apply tfplan'
+          sh "terraform apply -var='environment=${env.BRANCH_NAME}' -auto-approve"
         }
       }
     }
