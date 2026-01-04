@@ -47,3 +47,9 @@ resource "aws_instance" "jenkins_demo" {
     Environment = var.environment
   }
 }
+
+
+output "instance_public_ip" {
+  description = "The public IP address of the EC2 instance"
+  value       = aws_instance.jenkins_demo.public_ip
+}
