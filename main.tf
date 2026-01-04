@@ -2,6 +2,11 @@ provider "aws" {
   region = "eu-west-1"
 }
 
+variable "environment" {
+  description = "Environment name from pipeline"
+  type        = string
+}
+
 # Create a security group in the correct VPC
 resource "aws_security_group" "jenkins_sg" {
   name        = "jenkins-sg-temp"
@@ -38,7 +43,7 @@ resource "aws_instance" "jenkins_demo" {
   vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
 
   tags = {
-    Name        = "jenkins-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+    Name        = "jenkins-${var.environment}"
+    Environment = var.environment
   }
 }
