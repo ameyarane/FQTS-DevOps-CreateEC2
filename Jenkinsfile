@@ -46,19 +46,23 @@ pipeline {
           string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
           string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
         ]) {
-          sh 'terraform apply -auto-approve'
+          sh "terraform apply -var='environment=${env.BRANCH_NAME}' -auto-approve"
         }
       }
     }
   }
   post {
-    always {
-      withCredentials([
-        string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
-        string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
-      ]) {
-        sh 'terraform output'
+  always {
+    withCredentials([
+      string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+      string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
+    ]) {
+      script {
+        def ip = sh(script: "terraform output -raw instance_public_ip", returnStdout: true).trim()
+        echo "EC2 Instance Public IP: ${ip}"
       }
     }
   }
+}
+
 }
