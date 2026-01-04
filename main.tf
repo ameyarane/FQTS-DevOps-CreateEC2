@@ -2,14 +2,43 @@ provider "aws" {
   region = "eu-west-1"
 }
 
-resource "aws_instance" "jenkins_demo" {
-  ami           = "ami-0ebfed9ccce07b642"
-  instance_type = "t2.micro"
-  key_name      =  "fqts-demo-key"
-  vpc_security_group_ids = ["sg-0fc76108e42f52851"]
-  tags = {
-    Name = "jenkins-${terraform.workspace}"
-    Environment = "${terraform.workspace}"
+# Create a security group in the correct VPC
+resource "aws_security_group" "jenkins_sg" {
+  name        = "jenkins-sg-temp"
+  description = "Security group for Jenkins EC2"
+  vpc_id      =  "vpc-020cdb293828a27e7"
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Open to all, restrict in prod!
+  }
+  ingress {
+    description = "Jenkins"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
+resource "aws_instance" "jenkins_demo" {
+  ami                    = "ami-0ebfed9ccce07b642"
+  instance_type          = "t2.micro"
+  key_name               = "fqts-demo-key"
+  #subnet_id              = var.subnet_id
+  vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
+
+  tags = {
+    Name        = "jenkins-${terraform.workspace}"
+    Environment = "${terraform.workspace}"
+  }
+}
