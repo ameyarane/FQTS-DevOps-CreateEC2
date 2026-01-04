@@ -12,16 +12,12 @@ pipeline {
     }
     stage('Init Terraform') {
       steps {
-        dir("${env.BRANCH_NAME}") {
-          sh 'terraform init'
-        }
+        sh 'terraform init'
       }
     }
     stage('Plan Terraform') {
       steps {
-        dir("${env.BRANCH_NAME}") {
-          sh 'terraform plan -out=tfplan'
-        }
+        sh 'terraform plan -out=tfplan'
       }
     }
     stage('Apply Terraform') {
@@ -29,10 +25,8 @@ pipeline {
         branch 'prod'
       }
       steps {
-        dir("${env.BRANCH_NAME}") {
-          input message: "Do you want to apply changes to production?"
-          sh 'terraform apply tfplan'
-        }
+        input message: "Do you want to apply changes to production?"
+        sh 'terraform apply tfplan'
       }
     }
     stage('Apply to Stage') {
@@ -40,17 +34,13 @@ pipeline {
         branch 'stage'
       }
       steps {
-        dir("${env.BRANCH_NAME}") {
-          sh 'terraform apply -auto-approve'
-        }
+        sh 'terraform apply -auto-approve'
       }
     }
   }
   post {
     always {
-      dir("${env.BRANCH_NAME}") {
-        sh 'terraform output'
-      }
+      sh 'terraform output'
     }
   }
 }
